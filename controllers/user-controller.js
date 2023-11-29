@@ -1,54 +1,79 @@
 const modelUser = require("../models/user");
 require('dotenv').config()
 
+const verifyToken = (req, res, next) => {
+    const token = req.cookies.token;
+
+    if (!token) {
+        // return res.redirect('/login');
+        res.status(404).json({
+            success: false,
+            message: 'Session Token Has Expired'
+        })
+    }
+
+    try {
+        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+        req.user = decoded.id_user;
+        next();
+    } catch (error) {
+        // return res.redirect('/login');
+        res.status(404).json({
+            success: false,
+            message: 'Session Token Has Expired'
+        })
+    }
+};
+
 
 const register = async (req,res) =>{
 try {
         const name = req.body.name
-        const email = req.body.email
-        const password = req.body.password
+    const email = req.body.email
+    const password = req.body.password
+    const gender = req.body.gender
 
+    if (!nama || !email || !password || !gender) {
+        res.status(400).json({
+            success: false,
+            message: 'Please complete your account data'
+        })
+    } else {
+        const findEmail = await modelUser.findOne({
+            where: {
+                email: email
+            }
+        })
 
-        if (!nama || !email || !password) {
+        if (findEmail) {
             res.status(400).json({
                 success: false,
-                message: 'Please complete your account data'
+                message: 'Email is already in use'
             })
         } else {
-            const findEmail = await modelUser.findOne({
-                where: {
-                    email: email
-                }
+            const salt = bcrypt.genSaltSync(10)
+            const hashedPass = bcrypt.hashSync(password, salt)
+
+            const addUser = await modelUser.create({
+                nama: nama,
+                email: email,
+                password: hashedPass,
+                jenis_kelamin: jenis_kelamin
             })
 
-            if (findEmail) {
-                res.status(400).json({
-                    success: false,
-                    message: 'Email is already in use'
+            if (addUser) {
+                res.status(200).json({
+                    success: true,
+                    message: 'Account registration successful'
                 })
             } else {
-                const salt = bcrypt.genSaltSync(10)
-                const hashedPass = bcrypt.hashSync(password, salt)
-
-                const addUser = await User.create({
-                    name: name,
-                    email: email,
-                    password: hashedPass,
+                res.status(400).json({
+                    success: false,
+                    message: 'Account registration was unsuccessful'
                 })
-
-                if (addUser) {
-                    res.status(200).json({
-                        success: true,
-                        message: 'Account registration successful'
-                    })
-                } else {
-                    res.status(400).json({
-                        success: false,
-                        message: 'Account registration was unsuccessful'
-                    })
-                }
             }
         }
+    }
 
     } catch (error) {
         res.status(500).json({
@@ -154,4 +179,4 @@ const logout = async (req,res) =>{
     }
 }
 
-module.exports = {register, login, logout};
+module.exports = {verifyToken, register, login, logout};
