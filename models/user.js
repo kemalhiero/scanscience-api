@@ -1,43 +1,28 @@
-const {Sequelize, DataTypes} = require('sequelize')
-require('dotenv').config()
-const sequelize = new Sequelize(`mysql://${process.env.DB_USER}:${process.env.DB_PASSWORD}@${process.env.DB_HOST}/${process.env.DB_NAME}`)
+'use strict';
 
-const User = sequelize.define('user', {
-    id_user:{
-        type: DataTypes.INTEGER,
-        allowNull: false,
-        primaryKey: true,
-        autoIncrement: true
-    },
-    nama:{
-        type: DataTypes.STRING,
-        allowNull: false
-    },
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db')
+
+const user = sequelize.define('user',{ 
     email: {
-        type: DataTypes.STRING,
-        allowNull: false
+      type : DataTypes.STRING(30),
+      primaryKey: true,
+      allowNull : false,
+      validate: {
+        isEmail: true
+      }
+    },    
+    password: {
+      allowNull: false,
+      type: DataTypes.STRING
     },
-    password:{
-        type: DataTypes.STRING,
-        allowNull: false
-    },
-    jenis_kelamin: {
-        type: DataTypes.INTEGER,
-        allowNull: false
-    },
-    created_at: {
-        type: DataTypes.DATE,
-        allowNull: false
-    },
-    updated_at: {
-        type: DataTypes.DATE,
-        allowNull: false
+    name: {
+      type : DataTypes.STRING(30),
+      allowNull : false
     }
-}, {
-    tableName: 'user',
-    timestamps: true,
-    createdAt: 'created_at',
-    updatedAt: 'updated_at'
-})
 
-module.exports = User
+  }, {
+    freezeTableName: true
+  });
+
+  module.exports = user;
