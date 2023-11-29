@@ -78,7 +78,7 @@ Register digunakan untuk membuat akun, dan dapat melakukan login
       <td>Data Password yang akan digunakan untuk akun anda</td>
    </tr>
    <tr>
-      <td>jenis_kelamin</td>
+      <td>gender</td>
       <td>required</td>
       <td>Data jenis kelamin yang akan digunakan untuk akun anda</td>
    </tr>
