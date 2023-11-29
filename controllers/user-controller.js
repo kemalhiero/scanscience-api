@@ -58,7 +58,7 @@ try {
                 nama: nama,
                 email: email,
                 password: hashedPass,
-                jenis_kelamin: jenis_kelamin
+                gender: gender
             })
 
             if (addUser) {
