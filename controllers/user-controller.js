@@ -1,23 +1,23 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken')
 const modelUser = require("../models/user");
+const modelToken = require("../models/token");
 require('dotenv').config()
 
-const verifyToken = (req, res, next) => {
-    const token = req.cookies.token;
-
-    if (!token) {
-        // return res.redirect('/login');
-        res.status(404).json({
-            success: false,
-            message: 'Session Token Has Expired'
-        })
-    }
-
+const verifyToken = (req, res, next) => {    
     try {
+        const token = req.get('Authorization');
+    
+        if (!token) {
+            res.status(404).json({
+                success: false,
+                message: 'Session Token Has Expired'
+            })
+        }
         const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
         req.user = decoded.id_user;
         next();
     } catch (error) {
-        // return res.redirect('/login');
         res.status(404).json({
             success: false,
             message: 'Session Token Has Expired'
@@ -28,12 +28,11 @@ const verifyToken = (req, res, next) => {
 
 const register = async (req,res) =>{
 try {
-        const name = req.body.name
+    const name = req.body.name
     const email = req.body.email
     const password = req.body.password
-    const gender = req.body.gender
 
-    if (!nama || !email || !password || !gender) {
+    if (!name || !email || !password ) {
         res.status(400).json({
             success: false,
             message: 'Please complete your account data'
@@ -55,10 +54,7 @@ try {
             const hashedPass = bcrypt.hashSync(password, salt)
 
             const addUser = await modelUser.create({
-                nama: nama,
-                email: email,
-                password: hashedPass,
-                gender: gender
+                nama: name, email, password: hashedPass
             })
 
             if (addUser) {
@@ -75,7 +71,7 @@ try {
         }
     }
 
-    } catch (error) {
+    } catch (err) {
         res.status(500).json({
             success: false,
             message: err
@@ -102,8 +98,8 @@ const login = async (req,res) =>{
             })
 
             if (findUser) {
-                const id_user = findUser.id_user
-                const findPassword = findUser.password
+                // const id_user = findUser.id_user
+                const findPassword = findUser.password;
 
                 bcrypt.compare(password, findPassword, async (err, results) => {
                     if (err || !results) {
@@ -113,26 +109,31 @@ const login = async (req,res) =>{
                         })
                     } else {
                         const token = jwt.sign({
-                                id_user: id_user,
+                                email
                             },
                             process.env.ACCESS_TOKEN_SECRET, {
                                 expiresIn: '1w'
                             }
                         );
 
-                        req.session.id_user = id_user
+                        // req.session.id_user = id_user
 
-                        res.cookie('token', token, {
-                            httpOnly: true,
-                            secure: true,
-                            maxAge: 7 * 24 * 60 * 60 * 1000,
+                        // res.cookie('token', token, {
+                        //     httpOnly: true,
+                        //     secure: true,
+                        //     maxAge: 7 * 24 * 60 * 60 * 1000,
+                        // });
+
+                        await modelToken.create({ 
+                            token,
+                            id_user: findUser.id_user,
                         });
 
                         res.status(200).json({
                             success: true,
                             message: 'Login Success',
-                            token: token,
-                            id_user: req.session.id_user
+                            token,
+                            // id_user: req.session.id_user
                         })
 
                     }
@@ -148,34 +149,60 @@ const login = async (req,res) =>{
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: err
+            message: error
         });
-        console.error(err);
+        console.error(error);
     }
 }
 
 const logout = async (req,res) =>{
   try {
+        // mengambil token dari header Authorization
+        const authHeader = req.get('Authorization');
         
-        req.session.destroy((err) => {
+        // jika token tidak ada, kembalikan respons error
+        if (!authHeader) {
+            return res.status(401).json({ succes: false, message: 'Tidak ada token atau sudah logout sebelumnya' });
+        }
+
+        const token = authHeader.split(' ')[1];
+
+        jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, user) => {
             if (err) {
-                console.log(err);
-                return res.status(500).json({
-                    success: false,
-                    message: "Logging out didn't work",
-                });
+              return res.status(401).json({ succes: false, message: err });
             }
-    
-            res.clearCookie('sessionID');
-            return res.status(200).json({
-                success: true,
-                message: 'Logout was successful',
-            });
+
+            const adaToken = await modelToken.findOne({where: {token}})
+            if (!adaToken) {
+                return res.status(401).json({ succes: false, message: "Tidak ada token atau sudah logout sebelumnya" });
+            }
+            
+            // hapus token dari database
+            await modelToken.destroy({ where: {token}});
+        
+            // kembalikan respons berhasil logout
+            res.status(200).json({ success: true, message: 'Logout berhasil' });
         });
+        
+        // req.session.destroy((err) => {
+        //     if (err) {
+        //         console.log(err);
+        //         return res.status(500).json({
+        //             success: false,
+        //             message: "Logging out didn't work",
+        //         });
+        //     }
+    
+        //     res.clearCookie('sessionID');
+        //     return res.status(200).json({
+        //         success: true,
+        //         message: 'Logout was successful',
+        //     });
+        // });
 
     } catch (error) {
-        res.status(500).json({ success: false, message: err });
-        console.error(err);
+        res.status(500).json({ success: false, message: error });
+        console.error(error);
     }
 }
 

@@ -21,13 +21,12 @@ const user = sequelize.define('user',{
       allowNull: false,
       type: DataTypes.STRING
     },
-    name: {
+    nama: {
       type : DataTypes.STRING(50),
       allowNull : false
     },
-    gender: {
+    jenis_kelamin: {
         type: DataTypes.STRING,
-        allowNull: false
     },
     created_at: {
         type: DataTypes.DATE,
@@ -39,8 +38,6 @@ const user = sequelize.define('user',{
     }
   }, {
     freezeTableName: true,
-    tableName: 'user',
-    timestamps: true,
     createdAt: 'created_at',
     updatedAt: 'updated_at'
   });
