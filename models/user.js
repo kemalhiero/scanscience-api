@@ -5,10 +5,10 @@ const sequelize = require('../config/db')
 
 const user = sequelize.define('user',{ 
     id_user:{
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false,
         primaryKey: true,
-        autoIncrement: true
+        defaultValue: DataTypes.UUIDV4
     },
     email: {
       type : DataTypes.STRING(100),
