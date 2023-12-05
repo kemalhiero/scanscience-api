@@ -15,7 +15,7 @@ const token = sequelize.define('token',{
       type: DataTypes.STRING
     },
     id_user: {
-      type : DataTypes.INTEGER,
+      type : DataTypes.UUID,
       allowNull : false
     },
     created_at: {
