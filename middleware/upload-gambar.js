@@ -41,7 +41,7 @@ function uploadFile(namaFolder, maxFileSize, allowedMimeTypes) {
         }
 
         if (!req.file) {
-            return res.status(400).send({ message: 'Upload file yang sesuai terlebih dahulu!' });
+            return res.status(400).send({ success: false, message: 'Upload file yang sesuai terlebih dahulu!' });
         }
 
         const namaFile = namaFolder + '/' + Date.now().toString() + '_' + req.file.originalname
@@ -66,6 +66,7 @@ function uploadFile(namaFolder, maxFileSize, allowedMimeTypes) {
             });
 
             res.status(200).send({
+                success: true,
                 message: 'Uploaded the file successfully: ' + req.file.originalname,
                 url: encodeURI(publicUrl),
             });
