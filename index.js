@@ -15,6 +15,7 @@ app.use(express.urlencoded({ extended: true }));  // parse requests yang berupa 
 
 // panggil routes
 app.use("/user", require('./routes/user-route'));
+app.use("/gambar", require('./routes/gambar-route'));
 
 // halaman root
 app.get('/', (req, res) => {
