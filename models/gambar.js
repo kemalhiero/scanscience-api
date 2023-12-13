@@ -23,7 +23,6 @@ const gambar = sequelize.define('gambar',{
         allowNull : false,
     },
     keterangan: {
-        allowNull: false,
         type: DataTypes.STRING(255)
     },
   }, {

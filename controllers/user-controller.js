@@ -1,29 +1,8 @@
+const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken')
 const modelUser = require("../models/user");
 const modelToken = require("../models/token");
 require('dotenv').config()
-
-const verifyToken = (req, res, next) => {    
-    try {
-        const token = req.get('Authorization');
-    
-        if (!token) {
-            res.status(404).json({
-                success: false,
-                message: 'Session Token Has Expired'
-            })
-        }
-        const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
-        req.user = decoded.id_user;
-        next();
-    } catch (error) {
-        res.status(404).json({
-            success: false,
-            message: 'Session Token Has Expired'
-        })
-    }
-};
 
 
 const register = async (req,res) =>{
@@ -100,6 +79,7 @@ const login = async (req,res) =>{
             if (findUser) {
                 // const id_user = findUser.id_user
                 const findPassword = findUser.password;
+                const id_user = findUser.id_user;
 
                 bcrypt.compare(password, findPassword, async (err, results) => {
                     if (err || !results) {
@@ -109,7 +89,7 @@ const login = async (req,res) =>{
                         })
                     } else {
                         const token = jwt.sign({
-                                email
+                                email, id_user
                             },
                             process.env.ACCESS_TOKEN_SECRET, {
                                 expiresIn: '1w'
@@ -206,4 +186,4 @@ const logout = async (req,res) =>{
     }
 }
 
-module.exports = {verifyToken, register, login, logout};
+module.exports = { register, login, logout};

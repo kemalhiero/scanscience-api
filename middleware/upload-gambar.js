@@ -1,7 +1,8 @@
 const {Storage} = require('@google-cloud/storage');
 const multer  = require('multer');
 const path = require('path');
-require('dotenv').config()
+const modelGambar = require("../models/gambar");
+require('dotenv').config();
 
 const serviceKey = path.join(__dirname, '../config/capstone-406803-4f5b547193af.json');
 
@@ -34,9 +35,9 @@ function uploadFile(namaFolder, maxFileSize, allowedMimeTypes) {
   const handleUpload = (req, res) => {
     multerUpload.single('file')(req, res, async (err) => {
         if (err instanceof multer.MulterError) {
-            return res.status(500).json({ error: 'Multer error', message: err.message });
+            return res.status(500).json({ success: false, error: 'Multer error', message: err.message });
         } else if (err) {
-            return res.status(500).json({ error: 'Unknown error', message: err.message });
+            return res.status(500).json({ success: false, error: 'Unknown error', message: err.message });
         }
 
         if (!req.file) {
@@ -55,6 +56,14 @@ function uploadFile(namaFolder, maxFileSize, allowedMimeTypes) {
 
         blobStream.on('finish', async () => {
             const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+
+            const {nama, keterangan} = req.body;
+            console.log(req.user);
+            const iduser = req.user.id_user;
+    
+            await modelGambar.create({
+                link:namaFile, nama, keterangan, iduser
+            });
 
             res.status(200).send({
                 message: 'Uploaded the file successfully: ' + req.file.originalname,
@@ -106,7 +115,7 @@ const deleteFile = async (fileName) => {
       return { success: true, message: `File ${fileName} deleted successfully.` };
   } catch (error) {
       console.error(error);
-      return { success: false, message: `Error deleting file ${fileName}.` };
+      return { success: false, message: error.message };
   }
 };
 

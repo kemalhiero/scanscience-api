@@ -12,5 +12,5 @@ API Aplikasi Mobile
 5. Penginstalan berhasil ketika folder node_modules sudah muncul pada direktori Anda.
 6. buat file baru dengan nama `.env`
 7. buka file `.env.example`, copy isinya lalu pastekan ke file `.env`
-8. isikan nama database, host, port, username, password, dan kode token ke file `.env`
-9. untuk menjalankan api jalankan perintah npm test di terminal, pastikan sudah pernah install nodemon sebelumnya
+8. isikan nama database, host, port, username, password, kode token dan dan yang lainnya ke file `.env`
+9. untuk menjalankan api, jalankan perintah npm test di terminal, pastikan sudah pernah install library nodemon sebelumnya

@@ -1,11 +1,12 @@
 const router = require("express").Router();
 const gambarController = require("../controllers/gambar-controller");
+const verifyToken = require("../middleware/authentication")
 
 router.route("/")
-    .get(gambarController.list)
-    .post(gambarController.upload);
+    .get(verifyToken, gambarController.list)
+    .post(verifyToken ,gambarController.upload);
     
 router.route("/:idgambar")
-    .delete(gambarController.hapus)
+    .delete(verifyToken, gambarController.hapus);
 
 module.exports = router;

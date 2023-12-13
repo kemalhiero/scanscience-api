@@ -1,3 +1,4 @@
+require('dotenv').config();
 const modelGambar = require("../models/gambar");
 const { uploadFile, getListFiles, deleteFile } = require('../middleware/upload-gambar');
 
@@ -21,43 +22,72 @@ const upload = async (req, res) => {
         }
 
         res.status(500).send({
-            message: `Could not upload the file: ${req.file.originalname}. ${err}`,
+            message: `Could not upload the file: ${req.file}. ${err}`,
         });
     }
 };
 
 const list = async (req, res) => {
     try {
-        getListFiles(req, res);
+        // getListFiles(req, res);
+        const data_gambar = await modelGambar.findAll({
+            where: { iduser: req.user.id_user }
+        });
+
+        const data = data_gambar.map((gambar) => {
+			return {
+				idgambar: gambar.idgambar,
+				link: encodeURI(`https://storage.googleapis.com/${process.env.BUCKET_NAME}/${gambar.link}`),
+				nama: gambar.nama,
+				keterangan: gambar.keterangan,
+				createdAt: gambar.createdAt,
+				updatedAt: gambar.updatedAt,
+			};
+		});
+
+        res.status(200).json({ success: true, count: data.length, data });
+
     } catch (err) {
         console.log(err);
-        res.status(500).json({ error: true, message: err });
+        res.status(500).json({ success: false, message: err });
     }
 };
 
 const hapus = async (req, res) => {
     try {
-        const idgambar = req.params.idgambar;
+        const {idgambar} = req.params;
 
-        console.log(idgambar)
+        if (!idgambar) {
+            return res.status(401).json({ success: false, message: 'Pilih file terlebih dahulu' });
+        }
+        // console.log(idgambar)
         
-        deleteFile("gambar-user/"+idgambar)
-            .then(result => {
+        const gambar = await modelGambar.findByPk(idgambar);
+        // console.log(gambar);
+        if (!gambar) {
+            return res.status(401).json({ success: false, message: 'File yang dimaksud tidak ada' });
+        }
+
+        const namaFile = gambar.link.split('/')[1]
+        
+        deleteFile(gambar.link)
+            .then(async result => {
                 if (result.success) {
-                    console.log(`File deleted successfully: ${idgambar}`);
-                    return res.status(200).json({ success: true, message: `File deleted successfully: ${idgambar}` });
+                    console.log(`File berhasil dihapus: ${namaFile}`);
+                    await gambar.destroy();
+                    return res.status(200).json({ success: true, message: `File berhasil dihapus: ${namaFile}` });
                 } else {
                     console.error(result);
-                    return res.status(500).json({ success: false, message: `Failed to delete file: ${idgambar}. Reason: ${result.message}` });
+                    return res.status(500).json({ success: false, message: `Gagal menghapus file: ${namaFile}. Reason: ${result.message}` });
                 }
             })
             .catch(error => {
-                console.error(`Error deleting file: ${idgambar}. Reason: ${error.message}`);
+                console.error(`Gagal menghapus file: ${namaFile}. Reason: ${error.message}`);
             });
 
     } catch (err) {
         console.log(err);
-        res.status(500).json({ error: true, message: err });
+        res.status(500).json({ success: false, message: err });
     }
 };
 
