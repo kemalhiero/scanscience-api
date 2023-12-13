@@ -2,16 +2,18 @@
 
 // panggil tabel
 const fakta = require('./fakta');
+const gambar = require('./gambar');
 const jenis = require('./jenis');
 const koleksi = require('./koleksi');
 const komentar = require('./komentar');
-const objek_postingan = require('./objek_postingan');
+const objek_gambar = require('./objek_gambar');
 const objek = require('./objek');
 const postingan = require('./postingan');
 const suka = require('./suka');
 const token = require('./token');
 const umpan_balik = require('./umpan_balik');
 const user = require('./user');
+const objek_gambar = require('./objek_gambar');
 
 // relasi antar tabel
 user.hasMany(token, {foreignKey: 'id_user'});
@@ -50,5 +52,11 @@ umpan_balik.belongsTo(jenis, {foreignKey: 'idjenis'});
 objek.hasMany(fakta, {foreignKey: 'idobjek'});
 fakta.belongsTo(objek, {foreignKey: 'idobjek'});
 
-objek.belongsToMany(postingan, {through : objek_postingan, foreignKey: 'idobjek'});
-postingan.belongsToMany(objek, {through : objek_postingan, foreignKey: 'idpostingan'});
+objek.belongsToMany(gambar, {through : objek_gambar, foreignKey: 'idobjek'});
+gambar.belongsToMany(objek, {through : objek_gambar, foreignKey: 'idgambar'});
+
+user.hasMany(gambar, {foreignKey: 'iduser'});
+gambar.belongsTo(user, {foreignKey: 'iduser'});
+
+gambar.hasOne(postingan, {foreignKey: 'idgambar'})
+postingan.belongsTo(gambar, {foreignKey: 'idgambar'})

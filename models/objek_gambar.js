@@ -3,14 +3,14 @@
 const { DataTypes } = require('sequelize');
 const sequelize = require('../config/db')
 
-const objek_postingan = sequelize.define('objek_postingan',{ 
+const objek_gambar = sequelize.define('objek_gambar',{ 
     id:{
         type: DataTypes.UUID,
         allowNull: false,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4
     },
-    idpostingan:{
+    idgambar:{
         type: DataTypes.UUID,
         allowNull: false
     },
@@ -23,4 +23,4 @@ const objek_postingan = sequelize.define('objek_postingan',{
     timestamps: false
   });
 
-  module.exports = objek_postingan;
+  module.exports = objek_gambar;

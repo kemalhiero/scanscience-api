@@ -1,11 +1,11 @@
-const { uploadFile } = require('../middleware/upload-gambar');
+const modelGambar = require("../models/gambar");
+const { uploadFile, getListFiles, deleteFile } = require('../middleware/upload-gambar');
 
-// Import other dependencies or configurations as needed
 
 const { handleUpload } = uploadFile(
-        'gambar-user', 
-        1024 * 1024 * 3, 
-        ['image/png', 'image/jpg', 'image/jpeg', 'application/pdf']
+        'gambar-user', // nama folder di bucket
+        1024 * 1024 * 3,  // maksimal ukuran file, kalau ini brrti 3MB
+        ['image/png', 'image/jpg', 'image/jpeg']    //jenis file yang diterima
     );
 
 const upload = async (req, res) => {
@@ -26,4 +26,39 @@ const upload = async (req, res) => {
     }
 };
 
-module.exports = { upload };
+const list = async (req, res) => {
+    try {
+        getListFiles(req, res);
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: true, message: err });
+    }
+};
+
+const hapus = async (req, res) => {
+    try {
+        const idgambar = req.params.idgambar;
+
+        console.log(idgambar)
+        
+        deleteFile("gambar-user/"+idgambar)
+            .then(result => {
+                if (result.success) {
+                    console.log(`File deleted successfully: ${idgambar}`);
+                    return res.status(200).json({ success: true, message: `File deleted successfully: ${idgambar}` });
+                } else {
+                    console.error(result);
+                    return res.status(500).json({ success: false, message: `Failed to delete file: ${idgambar}. Reason: ${result.message}` });
+                }
+            })
+            .catch(error => {
+                console.error(`Error deleting file: ${idgambar}. Reason: ${error.message}`);
+            });
+
+    } catch (err) {
+        console.log(err);
+        res.status(500).json({ error: true, message: err });
+    }
+};
+
+module.exports = { upload, list, hapus };

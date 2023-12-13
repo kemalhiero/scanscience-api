@@ -1,5 +1,5 @@
 # API-Scan-Sciencce
-API Aplikasi Mobile (Login, Register, Logout)
+API Aplikasi Mobile
 
 
 # Instalasi

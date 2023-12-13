@@ -19,7 +19,7 @@ function uploadFile(namaFolder, maxFileSize, allowedMimeTypes) {
     if(allowedMimeTypes.includes(file.mimetype)) {
         cb(null, true)
     }else{
-        cb(null, false)
+        cb(new Error('Invalid file type. Allowed types are: ' + allowedMimeTypes.join(', ')), false)
     }
   }
 
@@ -28,11 +28,7 @@ function uploadFile(namaFolder, maxFileSize, allowedMimeTypes) {
     limits: {
       fileSize: maxFileSize
     },
-    fileFilter,
-    filename: (req, file, cb) => {
-      console.log(file);
-      cb(null, namaFolder + '/' + Date.now().toString() + '_' + file.originalname)
-    },
+    fileFilter
   });
 
   const handleUpload = (req, res) => {
@@ -62,7 +58,7 @@ function uploadFile(namaFolder, maxFileSize, allowedMimeTypes) {
 
             res.status(200).send({
                 message: 'Uploaded the file successfully: ' + req.file.originalname,
-                url: publicUrl,
+                url: encodeURI(publicUrl),
             });
         });
 
@@ -74,4 +70,44 @@ function uploadFile(namaFolder, maxFileSize, allowedMimeTypes) {
 
 };
 
-module.exports = {uploadFile};
+const getListFiles = async (req, res) => {
+  try {
+    const [files] = await bucket.getFiles();
+    let fileInfos = [];
+
+    files.forEach((file) => {
+      if (!file.name.endsWith('/')) {
+        fileInfos.push({
+          // name: file.name.split('/').pop(),
+          name: file.name,
+          url: encodeURI(`https://storage.googleapis.com/${bucket.name}/${file.name}`),
+          download: file.metadata.mediaLink,
+        });
+      }
+    });
+
+    res.status(200).send(fileInfos);
+
+  } catch (err) {
+
+    console.log(err);
+    res.status(500).send({
+      message: "Unable to read list of files!",
+    });
+    
+  }
+};
+
+const deleteFile = async (fileName) => {
+  try {
+      // console.log(fileName);
+      const file = bucket.file(fileName);
+      await file.delete();
+      return { success: true, message: `File ${fileName} deleted successfully.` };
+  } catch (error) {
+      console.error(error);
+      return { success: false, message: `Error deleting file ${fileName}.` };
+  }
+};
+
+module.exports = {uploadFile, getListFiles, deleteFile};
