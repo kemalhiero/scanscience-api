@@ -1,9 +1,9 @@
+require('dotenv').config()
+require("../models/associations");
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const modelUser = require("../models/user");
 const modelToken = require("../models/token");
-require('dotenv').config()
-
 
 const register = async (req,res) =>{
 try {
@@ -80,6 +80,7 @@ const login = async (req,res) =>{
                 // const id_user = findUser.id_user
                 const findPassword = findUser.password;
                 const id_user = findUser.id_user;
+                const nama_user = findUser.nama;
 
                 bcrypt.compare(password, findPassword, async (err, results) => {
                     if (err || !results) {
@@ -113,6 +114,7 @@ const login = async (req,res) =>{
                             success: true,
                             message: 'Login Success',
                             token,
+                            nama_user
                             // id_user: req.session.id_user
                         })
 

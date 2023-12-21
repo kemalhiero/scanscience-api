@@ -1,4 +1,5 @@
 require('dotenv').config();
+require("../models/associations");
 const modelUser = require("../models/user");
 const modelPostingan = require('../models/postingan')
 const modelSuka = require('../models/suka')

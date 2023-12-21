@@ -3,14 +3,16 @@ const modelToken = require("../models/token");
 
 const verifyToken = (req, res, next) => {    
     try {
-        const token = req.get('Authorization').split(' ')[1];
+        const authHeader = req.get('Authorization');
     
-        if (!token) {
+        if (!authHeader) {
             res.status(404).json({
                 success: false,
                 message: 'Masukkan token terlebih dahulu'
             })
         }
+
+        const token = authHeader.split(' ')[1];
         // const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
         // req.user = decoded;
 
@@ -31,6 +33,7 @@ const verifyToken = (req, res, next) => {
         });
         
     } catch (error) {
+        console.error(error)
         res.status(404).json({
             success: false,
             message: 'Session Token Has Expired'

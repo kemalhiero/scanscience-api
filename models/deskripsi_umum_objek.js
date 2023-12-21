@@ -1,29 +1,29 @@
 'use strict';
 
 const { DataTypes } = require('sequelize');
-const sequelize = require('../config/db')
+const sequelize = require('../config/db');
 
-const fakta = sequelize.define('fakta',{ 
-    idfakta:{
+const deskripsi_umum_objek = sequelize.define('deskripsi_umum_objek',{ 
+    iddeskripsi:{
         type: DataTypes.UUID,
         allowNull: false,
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4
     },
-    idobjek:{
-        type: DataTypes.UUID,
+    judul:{
+        type: DataTypes.STRING,
         allowNull: false
     },
-    judul: {
-        type : DataTypes.STRING(100),
-        allowNull : false,
-    },
-    fakta: {
+    deskripsi: {
         type : DataTypes.STRING(500),
         allowNull : false,
+    },
+    idobjek: {
+        allowNull: false,
+        type: DataTypes.UUID
     },
   }, {
     freezeTableName: true,
   });
 
-  module.exports = fakta;
+  module.exports = deskripsi_umum_objek;

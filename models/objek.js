@@ -18,6 +18,9 @@ const objek = sequelize.define('objek',{
         allowNull: false,
         type: DataTypes.STRING(1000)
     },
+    referensi: {
+        type: DataTypes.STRING(1000)
+    },
     idjenis:{
         type: DataTypes.UUID,
         allowNull: false

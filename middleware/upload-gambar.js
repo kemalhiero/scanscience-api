@@ -33,47 +33,52 @@ function uploadFile(namaFolder, maxFileSize, allowedMimeTypes) {
   });
 
   const handleUpload = (req, res) => {
-    multerUpload.single('file')(req, res, async (err) => {
-        if (err instanceof multer.MulterError) {
-            return res.status(500).json({ success: false, error: 'Multer error', message: err.message });
-        } else if (err) {
-            return res.status(500).json({ success: false, error: 'Unknown error', message: err.message });
-        }
-
-        if (!req.file) {
-            return res.status(400).send({ success: false, message: 'Upload file yang sesuai terlebih dahulu!' });
-        }
-
-        const namaFile = namaFolder + '/' + Date.now().toString() + '_' + req.file.originalname
-        const blob = bucket.file(namaFile);
-        const blobStream = blob.createWriteStream({
-            resumable: false,
-        });
-
-        blobStream.on('error', (err) => {
-            res.status(500).send({ message: err.message });
-        });
-
-        blobStream.on('finish', async () => {
-            const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
-
-            const {nama, keterangan} = req.body;
-            console.log(req.user);
-            const iduser = req.user.id_user;
-    
-            await modelGambar.create({
-                link:namaFile, nama, keterangan, iduser
-            });
-
-            res.status(200).send({
-                success: true,
-                message: 'Uploaded the file successfully: ' + req.file.originalname,
-                url: encodeURI(publicUrl),
-            });
-        });
-
-        blobStream.end(req.file.buffer);
-    });
+    try {
+        multerUpload.single('file')(req, res, async (err) => {
+          if (err instanceof multer.MulterError) {
+              return res.status(500).json({ success: false, error: 'Multer error', message: err });
+          } else if (err) {
+              return res.status(500).json({ success: false, error: 'Unknown error', message: err });
+          }
+  
+          if (!req.file) {
+              return res.status(400).send({ success: false, message: 'Upload file yang sesuai terlebih dahulu!' });
+          }
+  
+          const namaFile = namaFolder + '/' + Date.now().toString() + '_' + req.file.originalname
+          const blob = bucket.file(namaFile);
+          const blobStream = blob.createWriteStream({
+              resumable: false,
+          });
+  
+          blobStream.on('error', (err) => {
+              res.status(500).send({ message: err.message });
+          });
+  
+          blobStream.on('finish', async () => {
+              const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
+  
+              const {nama, keterangan} = req.body;
+              console.log(req.user);
+              const iduser = req.user.id_user;
+      
+              await modelGambar.create({
+                  link:namaFile, nama, keterangan, iduser
+              });
+  
+              res.status(200).send({
+                  success: true,
+                  message: 'Uploaded the file successfully: ' + req.file.originalname,
+                  url: encodeURI(publicUrl),
+              });
+          });
+  
+          blobStream.end(req.file.buffer);
+      });      
+    } catch (error) {
+        console.error(error);
+        throw Error(error);
+    }
   };
 
   return { multerUpload, handleUpload };

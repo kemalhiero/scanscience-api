@@ -1,4 +1,5 @@
 require('dotenv').config();
+require("../models/associations");
 const modelGambar = require("../models/gambar");
 const { uploadFile, getListFiles, deleteFile } = require('../middleware/upload-gambar');
 
@@ -66,7 +67,7 @@ const hapus = async (req, res) => {
         // console.log(gambar);
         if (!gambar) {
             return res.status(401).json({ success: false, message: 'File yang dimaksud tidak ada' });
-        }
+        };
 
         const namaFile = gambar.link.split('/')[1]
         

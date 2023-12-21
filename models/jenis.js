@@ -15,7 +15,6 @@ const jenis = sequelize.define('jenis',{
         allowNull : false,
     },
     keterangan: {
-        allowNull: false,
         type: DataTypes.STRING(255)
     },
   }, {
