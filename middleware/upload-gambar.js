@@ -2,6 +2,8 @@ const {Storage} = require('@google-cloud/storage');
 const multer  = require('multer');
 const path = require('path');
 const modelGambar = require("../models/gambar");
+const modelObjek = require("../models/objek");
+const modelObjekGambar = require("../models/objek_gambar");
 require('dotenv').config();
 
 const serviceKey = path.join(__dirname, '../config/capstone-406803-4f5b547193af.json');
@@ -58,19 +60,46 @@ function uploadFile(namaFolder, maxFileSize, allowedMimeTypes) {
           blobStream.on('finish', async () => {
               const publicUrl = `https://storage.googleapis.com/${bucket.name}/${blob.name}`;
   
-              const {nama, keterangan} = req.body;
+              const {nama, keterangan, objek} = req.body;
               console.log(req.user);
               const iduser = req.user.id_user;
-      
-              await modelGambar.create({
-                  link:namaFile, nama, keterangan, iduser
+                            
+              const datagambar = await modelGambar.create({
+                link:namaFile, nama, keterangan, iduser
               });
+
+              decodeURI(objek)
+              const dataobjek = await modelObjek.findOne({
+                where: {
+                  nama : objek
+                }
+              });
+
+              console.log(dataobjek);
+              
+              if (dataobjek) {
+                const idobjek = dataobjek.idobjek;
+                const idgambar = datagambar.idgambar;
   
-              res.status(200).send({
-                  success: true,
-                  message: 'Uploaded the file successfully: ' + req.file.originalname,
-                  url: encodeURI(publicUrl),
-              });
+                await modelObjekGambar.create({
+                    idgambar, idobjek
+                })
+    
+                res.status(200).send({
+                    success: true,
+                    message: `Sukses mengunggah gambar ${req.file.originalname} dan menyimpan objek yang terdeteksi` ,
+                    url: encodeURI(publicUrl),
+                });
+                
+              } else {
+                res.status(200).send({
+                    success: true,
+                    message: `Sukses mengunggah gambar ${req.file.originalname}, namun objek yang terdeteksi tidak disimpan karena belum terdata, atau objek masih kosong`,
+                    url: encodeURI(publicUrl),
+                });
+                
+              }
+
           });
   
           blobStream.end(req.file.buffer);

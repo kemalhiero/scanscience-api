@@ -10,18 +10,14 @@ const postingan = sequelize.define('postingan',{
         primaryKey: true,
         defaultValue: DataTypes.UUIDV4
     },
-    foto: {
-        type : DataTypes.STRING(255),
+    idgambar: {
+        type : DataTypes.UUID,
         allowNull : false,
+        unique: true
     },
     caption: {
-        allowNull: false,
         type: DataTypes.STRING(1000)
-    },
-    iduser:{
-        type: DataTypes.UUID,
-        allowNull: false
-    },
+    }
   }, {
     freezeTableName: true,
   });

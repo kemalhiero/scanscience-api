@@ -19,9 +19,6 @@ const user = require('./user');
 user.hasMany(token, {foreignKey: 'id_user'});
 token.belongsTo(user, {foreignKey: 'id_user'});
 
-user.hasMany(postingan, {foreignKey: 'iduser'});
-postingan.belongsTo(user, {foreignKey: 'iduser'});
-
 user.hasMany(koleksi, {foreignKey: 'iduser'});
 koleksi.belongsTo(user, {foreignKey: 'iduser'});
 
